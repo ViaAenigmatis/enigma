@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Enigma</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+      body { background: #f5e6d0; color: #3b2f2f; font-family: 'Cinzel', serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+      .panel { max-width: 800px; padding: 3rem; border: 1px solid rgba(59,47,47,0.2); border-radius: 16px; background: rgba(245,230,208,0.95); box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+      .cipher { font-size: 1.4rem; line-height: 2.2; white-space: pre-line; min-height: 400px; }
+      .line { margin-bottom: 2.5rem; font-family: 'Great Vibes', cursive; font-size: 1.5rem; color: #4b3621; opacity: 0; transform: translateY(6px); transition: opacity 0.2s ease, transform 0.2s ease; }
+      .line.revealed { opacity: 1; transform: translateY(0); }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <div class="cipher" id="cipher"></div>
+    </div>
+    <script>
+      const lines = [
+        {key:'S', text:"chi cerca onore senza merito trova solo inganno, perchè il cuore che rifiuta umiltà si riempie di vana superbia, lasciandolo cieco davanti alla verità"},
+        {key:'A', text:"accumula tesori, ignora amici, dimentica famiglia, respinge amore, teme il futuro, vive nel passato, schiavo del denaro, triste vittima dell'avarizia"},
+        {key:'L', text:"un tempo forte, l'uomo cede ai desideri più oscuri e proibiti, travolto completamente dalla lussuria"},
+        {key:'I', text:"nei corridoi del potere, l'uomo osserva inerme i successi altrui, consumato lentamente dal più profondo veleno dell'invidia"},
+        {key:'G', text:"quando si cede alla gola, l'eccesso e la mancanza di controllo creano dipendenze incontrollabili"},
+        {key:'I', text:"il cuore umano, tradito dell'orgoglio e dalla rabbia, esplode infine nell'ira"},
+        {key:'A', text:"accidia avvolge l'uomo come una nebbia oscura, impedendogli di agire e di cambiare il destino"}
+      ];
+
+      const container = document.getElementById('cipher');
+      let usedIndices = new Set();
+
+      document.addEventListener('keydown', e => {
+        const key = e.key.toUpperCase();
+        const idx = lines.findIndex((l, i) => l.key === key && !usedIndices.has(i));
+        if (idx !== -1) {
+          usedIndices.add(idx);
+          const el = document.createElement('div');
+          el.className = 'line revealed';
+          el.textContent = lines[idx].text;
+          container.appendChild(el);
+        }
+      });
+    </script>
+  </body>
+</html>
