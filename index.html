@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enigma</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      background: #f5e6d0; 
+      color: #3b2f2f; 
+      font-family: 'Cinzel', serif; 
+      padding: 3rem; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .line { 
+      margin-bottom: 2.5rem; 
+      font-family: 'Great Vibes', cursive; 
+      font-size: 1.7rem; 
+      color: #4b3621; 
+      opacity: 0;
+      clip-path: ellipse(0% 0% at 50% 50%);
+      transition: clip-path 1s ease-out, opacity 1s ease-out;
+    }
+
+    .line.revealed { 
+      opacity: 1;
+      clip-path: ellipse(75% 75% at 50% 50%);
+    }
+
+    .highlight {
+      color: #8B0000; /* rosso scuro stile sangue */
+      font-weight: bold;
+      transition: color 1s ease-in-out;
+    }
+
+    #hiddenInput {
+      position: absolute;
+      top: -100px;
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="cipher"></div>
+  <input type="text" id="hiddenInput" autocomplete="off" />
+
+  <script>
+    const lines = [
+      {key:'S', text:"Chi cerca onore senza merito trova solo inganno, perchè il cuore che rifiuta umiltà si riempie di vana superbia, lasciandolo cieco davanti alla verità."},
+      {key:'A', text:"Accumula tesori, ignora amici, dimentica famiglia, respinge amore, teme il futuro, vive nel passato, schiavo del denaro, triste vittima dell'avarizia."},
+      {key:'L', text:"Un tempo forte, l'uomo cede ai desideri più oscuri e proibiti, travolto completamente dalla lussuria."},
+      {key:'I', text:"Nei corridoi del potere, l'uomo osserva inerme i successi altrui, consumato lentamente dal più profondo veleno dell'invidia."},
+      {key:'G', text:"Quando si cede alla gola, l'eccesso e la mancanza di controllo creano dipendenze incontrollabili."},
+      {key:'I', text:"Il cuore umano, tradito dell'orgoglio e dalla rabbia, esplode infine nell'ira."},
+      {key:'A', text:"Accidia avvolge l'uomo come una nebbia oscura, impedendogli di agire e di cambiare il destino."}
+    ];
+
+    const container = document.getElementById('cipher');
+    const hiddenInput = document.getElementById('hiddenInput');
+
+    // Nuovo ordine: S A L I G I A
+    const correctOrder = ['S','A','L','I','G','I','A']; 
+    let currentOrder = [];
+
+    // Contatori per ogni lettera → mostra solo la prossima frase
+    let counters = {};
+    lines.forEach(l => counters[l.key] = 0);
+
+    function handleKey(key) {
+      const upperKey = key.toUpperCase();
+      
+      // Trova la prossima frase con questa lettera
+      const idx = lines.findIndex((l, i) => l.key === upperKey && counters[upperKey] === countKeyOccurrencesBefore(i, upperKey));
+      
+      if (idx !== -1) {
+        counters[upperKey]++; // Avanza il contatore di quella lettera
+
+        const el = document.createElement('div');
+        el.className = 'line';
+        el.innerHTML = lines[idx].text;
+        container.appendChild(el);
+
+        requestAnimationFrame(() => {
+          el.classList.add('revealed');
+        });
+
+        // Controllo ordine per evidenziare
+        currentOrder.push(upperKey);
+        if (currentOrder.length === correctOrder.length && currentOrder.every((v,i)=>v===correctOrder[i])) {
+          highlightWords();
+        }
+      }
+    }
+
+    // Conta quante volte la lettera appare prima di un certo indice
+    function countKeyOccurrencesBefore(index, key) {
+      return lines.slice(0, index).filter(l => l.key === key).length;
+    }
+
+    function highlightWords() {
+      const sins = ["superbia", "invidia", "ira", "accidia", "avarizia", "gola", "lussuria"];
+      document.querySelectorAll(".line").forEach(line => {
+        let text = line.innerHTML;
+        sins.forEach(sin => {
+          const regex = new RegExp(`\\b${sin}\\b`, "gi");
+          text = text.replace(regex, `<span class="highlight">${sin}</span>`);
+        });
+        line.innerHTML = text;
+      });
+    }
+
+    // PC
+    document.addEventListener('keydown', e => {
+      handleKey(e.key);
+    });
+
+    // Smartphone: clic ovunque per aprire tastiera
+    document.body.addEventListener('click', () => {
+      hiddenInput.focus();
+    }, { once: true });
+
+    // Smartphone: cattura lettere
+    hiddenInput.addEventListener('input', e => {
+      const val = e.target.value;
+      if (val.length > 0) {
+        handleKey(val[val.length - 1]);
+        e.target.value = "";
+      }
+    });
+  </script>
+</body>
+</html>
